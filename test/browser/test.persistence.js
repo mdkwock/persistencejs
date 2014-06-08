@@ -42,7 +42,7 @@ $(document).ready(function(){
   Project.hasMany('tasks', Task, 'project');
 
   window.Project = Project;
-  window.Task = Task
+  window.Task = Task;
   window.Project = Project;
   window.UniqueIndexTest = UniqueIndexTest;
 
@@ -330,7 +330,29 @@ $(document).ready(function(){
                         equals(results.length, 2, "'in' filter test");
                         coll.filter("name", "not in", ["q", "x"]).list(function(results) {
                             equals(results.length, 24, "'not in' filter test");
-                            callback();
+                                coll.filter("name", "like", "%a%").list(function(results) {
+                                  equals(results.length, 1, "'like %a%' filter test");
+                                  coll.filter("name", "like", "%a").list(function(results) {
+                                      equals(results.length, 1, "'like %a' filter test");
+                                      coll.filter("name", "like", "a%").list(function(results) {
+                                          equals(results.length, 1, "'like a%' filter test");
+                                          coll.filter("name", "like", "_").list(function(results) {
+                                              equals(results.length, 26, "'like _' filter test");
+                                              coll.filter("name", "not like", "%a%").list(function(results) {
+                                                  equals(results.length, 25, "'not like %a%' filter test");
+                                                  coll.filter("name", "not like", "_").list(function(results) {
+                                                      equals(results.length, 0, "'not like _' filter test");
+                                                      coll.add(new Task({name: 'Task %'}));
+                                                      coll.filter("name", "like", "%!%", "!").list(function(results) {
+                                                          equals(results.length, 1, "'like with escape' filter test");
+                                                          callback();
+                                                        });
+                                                    });
+                                                });
+                                            });
+                                        });
+                                    });
+                                });
                           });
                       });
                   });
@@ -385,7 +407,7 @@ $(document).ready(function(){
                     equals(results.length, 11, "> filter test");
                     start();
                   });
-              })
+              });
           });
       });
   }
